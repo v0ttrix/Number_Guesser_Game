@@ -1,4 +1,9 @@
-#define _CRT_SECURE_NO_WARNINGS
+/**
+ * File Handling Module Implementation
+ * Manages persistent storage of scores and history
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

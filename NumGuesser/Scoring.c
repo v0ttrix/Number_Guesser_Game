@@ -1,20 +1,45 @@
+/**
+ * Scoring System Implementation
+ * Tracks and displays game scores and history
+ */
+
+/**
+ * Scoring System Implementation
+ * Handles score history tracking and display
+ */
+
 #include <stdio.h>
 #include "Scoring.h"
 
-// Updates the score history struct by shifting left and adding the new score at the end
-void update_score_history(ScoreHistory* history, int newScore) {
+/**
+ * Updates score history by shifting left and adding new score
+ * @param history Array of previous scores
+ * @param new_score Latest score to add
+ */
+void update_score_history(int* history, int new_score) {
+    /* Shift all scores left by one position */
     for (int i = 0; i < HISTORY_SIZE - 1; i++) {
-        history->scores[i] = history->scores[i + 1];
+        history[i] = history[i + 1];
     }
-    history->scores[HISTORY_SIZE - 1] = newScore;
+    /* Add new score at the end */
+    history[HISTORY_SIZE - 1] = new_score;
 }
 
-// Prints all non-negative scores in the history
-void print_score_history(const ScoreHistory* history) {
-    printf("\nScore history (most recent last):\n");
+/**
+ * Prints the score history in a formatted manner
+ * @param history Array of scores to display
+ */
+void print_score_history(const int* history) {
+    printf("\n=== Recent Game History ===\n");
+    
+    int games_played = 0;
     for (int i = 0; i < HISTORY_SIZE; i++) {
-        if (history->scores[i] >= 0) {
-            printf("Game %d: %d attempts\n", i + 1, history->scores[i]);
+        if (history[i] > 0) {
+            printf("Game %d: %d attempts\n", ++games_played, history[i]);
         }
+    }
+    
+    if (games_played == 0) {
+        printf("No previous games recorded.\n");
     }
 }

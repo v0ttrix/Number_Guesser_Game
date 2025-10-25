@@ -1,14 +1,15 @@
-#pragma once
+/**
+ * Scoring System Header
+ * Defines constants and functions for score tracking
+ */
+
+#ifndef SCORING_H
+#define SCORING_H
 
 #define HISTORY_SIZE 5
 
-// Struct to hold the score history array
-typedef struct {
-    int scores[HISTORY_SIZE];
-} ScoreHistory;
+/* Function prototypes */
+void update_score_history(int* history, int new_score);
+void print_score_history(const int* history);
 
-// Updates the score history by shifting scores left and adding a new score at the end
-void update_score_history(ScoreHistory* history, int newScore);
-
-// Displays the score history
-void print_score_history(const ScoreHistory* history);
+#endif /* SCORING_H */

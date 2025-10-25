@@ -1,4 +1,26 @@
-#define _CRT_SECURE_NO_WARNINGS
+/*
+ * Number Guesser Game
+ * Author: Jaden Mardini
+ */
+
+/**
+ * Number Guesser Game
+ * Author: Jaden Mardini
+ * Professional C implementation with modular design
+ */
+
+/**
+ * Number Guesser Game
+ * Author: Jaden Mardini
+ * 
+ * A professional number guessing game demonstrating:
+ * - Modular C programming
+ * - File I/O operations
+ * - Random number generation
+ * - Input validation
+ * - Score tracking system
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -7,74 +29,120 @@
 #include "FileHandling.h"
 #include "Scoring.h"
 
-#define MAX_FILE    256
+#define MAX_FILENAME 256
 
-int main(int argc, char* argv[]) {
-    init_rng(); // Seed the random number generator
-
-    int UserGuess;
-    int UserChoice;
-    int history[HISTORY_SIZE];
-
-    // Check for command-line argument
-    if (argc != 2) {
-        printf("Usage: %s <savefile>\n", argv[0]);
-        return 1;
+/**
+ * Displays the main menu and gets user's difficulty choice
+ * @return User's choice (1 for easy, 2 for hard)
+ */
+int get_difficulty_choice(void) {
+    int choice;
+    printf("\n=== Number Guesser Game ===\n");
+    printf("Select difficulty level:\n");
+    printf("1. Easy (1-100)\n");
+    printf("2. Hard (1-500)\n");
+    printf("Enter your choice: ");
+    
+    if (scanf("%d", &choice) != 1) {
+        printf("Invalid input. Please enter a number.\n");
+        return -1;
     }
-  
-    // get the save file name from the command-line argument
-    char saveFile[MAX_FILE];
-    strncpy(saveFile, argv[1], MAX_FILE - 1);
+    
+    return choice;
+}
 
-    // Load previous score history from file
-    load_score_history(history, HISTORY_SIZE);
-
-    FILE* file = fopen(saveFile, "r");
-    if (file == NULL) {
-        printf("Error: Could not open file %s\n", saveFile);
-        exit (1);
-    }
-
-    fclose(file);
-
-    printf("What difficulty would you like to play? \n");
-    printf("Type 1 for easy\n");
-    printf("Type 2 for hard\n");
-    scanf("%d", &UserChoice);
-
+/**
+ * Plays the game based on selected difficulty
+ * @param difficulty 1 for easy, 2 for hard
+ * @return Number of attempts taken, or -1 on error
+ */
+int play_game(int difficulty) {
+    int user_guess;
     int attempts = 0;
-
-    if (UserChoice == 1) {
-        int RandNum = generate_random_number();
-        printf("Guess the Random Number Generated (1-100)\n");
-
-        attempts = CheckUserInput(&UserGuess, RandNum);
+    
+    if (difficulty == 1) {
+        int random_number = generate_random_number();
+        printf("\nGuess the number between 1 and 100!\n");
+        attempts = CheckUserInput(&user_guess, random_number);
+    } else if (difficulty == 2) {
+        int random_number = generate_random_hard_number();
+        printf("\nGuess the number between 1 and 500!\n");
+        attempts = CheckUserInput_Hard(&user_guess, random_number);
+    } else {
+        printf("Invalid difficulty selection.\n");
+        return -1;
     }
-    else if (UserChoice == 2) {
-        int RandNum = generate_random_hard_number();
-        printf("Guess the Random Number Generated (1-500)\n");
+    
+    return attempts;
+}
 
-        attempts = CheckUserInput_Hard(&UserGuess, RandNum);
-    }
-    else {
-        printf("Invalid choice. Exiting program.\n");
-        return 1;
-    }
-
-    // Check and update best score
-    int bestAttempts = load_high_score();
-    if (attempts < bestAttempts) {
+/**
+ * Handles score tracking and display
+ * @param attempts Number of attempts taken
+ */
+void handle_scoring(int attempts) {
+    /* Load and check high score */
+    int best_score = load_high_score();
+    
+    if (attempts < best_score) {
         save_high_score(attempts);
-        printf("New best score! You guessed the number in %d attempts.\n", attempts);
+        printf("\nNew personal best! You guessed it in %d attempts!\n", attempts);
+    } else {
+        printf("\nYou took %d attempts. Your best score is %d attempts.\n", 
+               attempts, best_score);
     }
-    else {
-        printf("You took %d attempts. Best score so far is %d attempts.\n", attempts, bestAttempts);
-    }
-
-    // Update and display score history
+    
+    /* Update score history */
+    int history[HISTORY_SIZE];
+    load_score_history(history, HISTORY_SIZE);
     update_score_history(history, attempts);
     save_score_history(history, HISTORY_SIZE);
     print_score_history(history);
+}
 
-    return 0;
+/**
+ * Main game entry point
+ */
+int main(int argc, char* argv[]) {
+    /* Validate command line arguments */
+    if (argc != 2) {
+        printf("Usage: %s <savefile>\n", argv[0]);
+        printf("Example: %s game_save.txt\n", argv[0]);
+        return EXIT_FAILURE;
+    }
+    
+    /* Validate save file */
+    char save_file[MAX_FILENAME];
+    strncpy(save_file, argv[1], MAX_FILENAME - 1);
+    save_file[MAX_FILENAME - 1] = '\0';
+    
+    FILE* file = fopen(save_file, "a");  /* Create if doesn't exist */
+    if (!file) {
+        printf("Error: Cannot access save file '%s'\n", save_file);
+        return EXIT_FAILURE;
+    }
+    fclose(file);
+    
+    /* Initialize random number generator */
+    init_rng();
+    
+    /* Get difficulty choice */
+    int difficulty = get_difficulty_choice();
+    if (difficulty < 1 || difficulty > 2) {
+        printf("Invalid choice. Exiting.\n");
+        return EXIT_FAILURE;
+    }
+    
+    /* Play the game */
+    int attempts = play_game(difficulty);
+    if (attempts < 0) {
+        printf("Game error occurred.\n");
+        return EXIT_FAILURE;
+    }
+    
+    /* Handle scoring */
+    handle_scoring(attempts);
+    
+    printf("\nThanks for playing!\n");
+    return EXIT_SUCCESS;
 }
